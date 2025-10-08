@@ -1,24 +1,32 @@
 {
     "name": "calculadora-rescisao",
-    "version": "1.0.0",
-    "description": "Calculadora de Rescisão Trabalhista Completa",
-    "main": "index.html",
+    "version": "2.0.0",
+    "description": "Calculadora de Rescisão Trabalhista Completa - React",
+    "type": "module",
     "scripts": {
-      "dev": "vercel dev",
-      "build": "echo 'Build completo'",
-      "deploy": "vercel --prod"
+        "dev": "vite",
+        "build": "vite build",
+        "preview": "vite preview",
+        "deploy": "vercel --prod"
     },
     "keywords": [
-      "rescisão",
-      "trabalhista",
-      "calculadora",
-      "direitos",
-      "CLT"
+        "rescisão",
+        "trabalhista",
+        "calculadora",
+        "direitos",
+        "CLT",
+        "react",
+        "vite"
     ],
-    "author": "Seu Nome",
+    "author": "Carlos Alberto Kümpel Imbriani",
     "license": "MIT",
-    "dependencies": {},
+    "dependencies": {
+        "react": "^19.2.0",
+        "react-dom": "^19.2.0"
+    },
     "devDependencies": {
-      "vercel": "^33.0.0"
+        "@vitejs/plugin-react": "^5.0.4",
+        "vercel": "^33.0.0",
+        "vite": "^7.1.9"
     }
-  }
+}
