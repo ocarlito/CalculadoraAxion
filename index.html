@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Rescisão Trabalhista | Seus Direitos Calculados</title>
+    <meta name="description" content="Calcule sua rescisão trabalhista completa e descubra se você tem direitos não pagos. Conecte-se com advogados especializados.">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Calculadora de Rescisão Trabalhista</h1>
+            <p class="subtitle">Descubra seus direitos e conecte-se com advogados especializados</p>
+        </header>
+
+        <main>
+            <form id="rescisaoForm">
+                <!-- ETAPA 1: Dados Básicos -->
+                <section class="form-section active" id="step1">
+                    <h2>Dados Básicos do Contrato</h2>
+                    
+                    <div class="form-group">
+                        <label for="dataAdmissao">
+                            Data de Admissão
+                            <span class="tooltip" data-tooltip="Data em que você começou a trabalhar na empresa">ℹ️</span>
+                        </label>
+                        <input type="date" id="dataAdmissao" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dataRescisao">
+                            Data da Rescisão
+                            <span class="tooltip" data-tooltip="Data do último dia trabalhado ou da comunicação do desligamento">ℹ️</span>
+                        </label>
+                        <input type="date" id="dataRescisao" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="tipoRescisao">
+                            Tipo de Rescisão
+                            <span class="tooltip" data-tooltip="Escolha o tipo de desligamento que ocorreu">ℹ️</span>
+                        </label>
+                        <select id="tipoRescisao" required>
+                            <option value="">Selecione...</option>
+                            <option value="sem_justa_causa">Demissão sem Justa Causa</option>
+                            <option value="pedido_demissao">Pedido de Demissão</option>
+                            <option value="justa_causa">Demissão por Justa Causa</option>
+                            <option value="acordo">Acordo (Demissão Consensual)</option>
+                            <option value="culpa_reciproca">Culpa Recíproca</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="salarioBase">
+                            Salário Base (R$ - Bruto)
+                            <span class="tooltip" data-tooltip="Seu salário fixo mensal, sem incluir horas extras ou adicionais">ℹ️</span>
+                        </label>
+                        <input type="number" id="salarioBase" step="0.01" min="0" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="diasTrabalhadosMes">
+                            Dias Trabalhados no Mês da Rescisão
+                            <span class="tooltip" data-tooltip="Quantos dias você trabalhou no mês em que foi demitido">ℹ️</span>
+                        </label>
+                        <input type="number" id="diasTrabalhadosMes" min="0" max="31" required>
+                    </div>
+
+                    <button type="button" class="btn-next" onclick="nextStep(2)">Próximo</button>
+                </section>
+
+                <!-- ETAPA 2: Adicionais e Horas Extras -->
+                <section class="form-section" id="step2">
+                    <h2>Adicionais e Horas Extras</h2>
+
+                    <div class="form-group checkbox-group">
+                        <label>
+                            <input type="checkbox" id="temHorasExtras" onchange="toggleSection('horasExtrasSection')">
+                            Recebia Horas Extras
+                            <span class="tooltip" data-tooltip="Marque se você fazia horas extras habitualmente">ℹ️</span>
+                        </label>
+                    </div>
+
+                    <div id="horasExtrasSection" class="subsection" style="display: none;">
+                        <div class="form-group">
+                            <label for="mediaHorasExtras">
+                                Média Mensal de Horas Extras (últimos 12 meses)
+                                <span class="tooltip" data-tooltip="Some todas as horas extras dos últimos 12 meses e divida por 12">ℹ️</span>
+                            </label>
+                            <input type="number" id="mediaHorasExtras" step="0.01" min="0">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="percentualHE">
+                                Percentual de Hora Extra (%)
+                                <span class="tooltip" data-tooltip="Mínimo legal é 50%. Verifique seu contracheque">ℹ️</span>
+                            </label>
+                            <input type="number" id="percentualHE" value="50" min="50" max="100">
+                        </div>
+                    </div>
+
+                    <div class="form-group checkbox-group">
+                        <label>
+                            <input type="checkbox" id="temAdicionalNoturno" onchange="toggleSection('adicionalNoturnoSection')">
+                            Recebia Adicional Noturno
+                            <span class="tooltip" data-tooltip="Trabalho entre 22h e 5h com adicional mínimo de 20%">ℹ️</span>
+                        </label>
+                    </div>
+
+                    <div id="adicionalNoturnoSection" class="subsection" style="display: none;">
+                        <div class="form-group">
+                            <label for="mediaAdicionalNoturno">
+                                Média Mensal de Adicional Noturno (R$)
+                                <span class="tooltip" data-tooltip="Valor médio mensal recebido de adicional noturno nos últimos 12 meses">ℹ️</span>
+                            </label>
+                            <input type="number" id="mediaAdicionalNoturno" step="0.01" min="0">
+                        </div>
+                    </div>
+
+                    <div class="form-group checkbox-group">
+                        <label>
+                            <input type="checkbox" id="temInsalubridade" onchange="toggleSection('insalubridadeSection')">
+                            Recebia Adicional de Insalubridade
+                            <span class="tooltip" data-tooltip="Trabalho em condições insalubres (calor, ruído, agentes químicos, etc.)">ℹ️</span>
+                        </label>
+                    </div>
+
+                    <div id="insalubridadeSection" class="subsection" style="display: none;">
+                        <div class="form-group">
+                            <label for="grauInsalubridade">
+                                Grau de Insalubridade
+                                <span class="tooltip" data-tooltip="Verifique no seu contracheque ou laudo técnico">ℹ️</span>
+                            </label>
+                            <select id="grauInsalubridade">
+                                <option value="10">Mínimo (10%)</option>
+                                <option value="20">Médio (20%)</option>
+                                <option value="40">Máximo (40%)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="baseInsalubridade">
+                                Base de Cálculo da Insalubridade
+                                <span class="tooltip" data-tooltip="Algumas empresas calculam sobre o salário-mínimo, outras sobre o salário-base">ℹ️</span>
+                            </label>
+                            <select id="baseInsalubridade">
+                                <option value="salario_minimo">Salário Mínimo</option>
+                                <option value="salario_base">Salário Base</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group checkbox-group">
+                        <label>
+                            <input type="checkbox" id="temPericulosidade" onchange="toggleSection('periculosidadeSection')">
+                            Recebia Adicional de Periculosidade
+                            <span class="tooltip" data-tooltip="Trabalho com risco de vida (eletricidade, explosivos, inflamáveis, etc.)">ℹ️</span>
+                        </label>
+                    </div>
+
+                    <div id="periculosidadeSection" class="subsection" style="display: none;">
+                        <p class="info-text">O adicional de periculosidade é de 30% sobre o salário base.</p>
+                    </div>
+
+                    <div class="btn-group">
+                        <button type="button" class="btn-back" onclick="prevStep(1)">Voltar</button>
+                        <button type="button" class="btn-next" onclick="nextStep(3)">Próximo</button>
+                    </div>
+                </section>
+
+                <!-- ETAPA 3: Férias e 13º -->
+                <section class="form-section" id="step3">
+                    <h2>Férias e 13º Salário</h2>
+
+                    <div class="form-group">
+                        <label for="feriasVencidas">
+                            Tem Férias Vencidas (não gozadas)?
+                            <span class="tooltip" data-tooltip="Férias que você já tinha direito mas ainda não tirou">ℹ️</span>
+                        </label>
+                        <select id="feriasVencidas" onchange="toggleSection('feriasVencidasSection')">
+                            <option value="nao">Não</option>
+                            <option value="sim">Sim</option>
+                        </select>
+                    </div>
+
+                    <div id="feriasVencidasSection" class="subsection" style="display: none;">
+                        <div class="form-group">
+                            <label for="periodosFeriasVencidas">
+                                Quantos Períodos de Férias Vencidas?
+                                <span class="tooltip" data-tooltip="Cada período aquisitivo completo não gozado">ℹ️</span>
+                            </label>
+                            <input type="number" id="periodosFeriasVencidas" min="0" max="2" value="1">
+                        </div>
+
+                        <div class="form-group checkbox-group">
+                            <label>
+                                <input type="checkbox" id="feriasEmDobro">
+                                Férias em Dobro (venceu o prazo concessivo)
+                                <span class="tooltip" data-tooltip="Se a empresa não concedeu férias no prazo de 12 meses após o período aquisitivo, deve pagar em dobro">ℹ️</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="mesesTrabalhadosProporcionais">
+                            Meses Trabalhados no Período Proporcional de Férias
+                            <span class="tooltip" data-tooltip="Quantos meses completos você trabalhou desde a última aquisição de férias (considere 15+ dias como 1 mês)">ℹ️</span>
+                        </label>
+                        <input type="number" id="mesesTrabalhadosProporcionais" min="0" max="11" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="mesesTrabalhados13">
+                            Meses Trabalhados no Ano para 13º Salário
+                            <span class="tooltip" data-tooltip="Quantos meses completos você trabalhou neste ano (considere 15+ dias como 1 mês)">ℹ️</span>
+                        </label>
+                        <input type="number" id="mesesTrabalhados13" min="0" max="12" required>
+                        <p class="info-text">Calculado automaticamente a partir das datas informadas; confirme se está correto antes de prosseguir.</p>
+                    </div>
+
+                    <div class="btn-group">
+                        <button type="button" class="btn-back" onclick="prevStep(2)">Voltar</button>
+                        <button type="button" class="btn-next" onclick="nextStep(4)">Próximo</button>
+                    </div>
+                </section>
+
+                <!-- ETAPA 4: FGTS e Valores Recebidos -->
+                <section class="form-section" id="step4">
+                    <h2>FGTS e Valores Já Recebidos</h2>
+
+                    <div class="form-group">
+                        <label for="saldoFGTS">
+                            Saldo Total do FGTS (R$)
+                            <span class="tooltip" data-tooltip="Consulte o saldo em fgts.caixa.gov.br ou no app FGTS">ℹ️</span>
+                        </label>
+                        <input type="number" id="saldoFGTS" step="0.01" min="0" required>
+                    </div>
+
+                    <div class="form-group checkbox-group">
+                        <label>
+                            <input type="checkbox" id="informarValoresRecebidos">
+                            Já recebi algum valor na rescisão
+                            <span class="tooltip" data-tooltip="Marque se você já recebeu alguma verba rescisória">ℹ️</span>
+                        </label>
+                    </div>
+
+                    <div id="valoresRecebidosSection" class="subsection" style="display: none;">
+                        <p class="info-text">Informe os valores que você já recebeu (deixe em branco ou 0 o que não recebeu):</p>
+
+                        <div class="form-group">
+                            <label for="saldoSalarioRecebido">Saldo de Salário Recebido (R$)</label>
+                            <input type="number" id="saldoSalarioRecebido" step="0.01" min="0" value="0">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="avisoPrevioRecebido">Aviso Prévio Recebido (R$)</label>
+                            <input type="number" id="avisoPrevioRecebido" step="0.01" min="0" value="0">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="decimoTerceiroRecebido">13º Salário Recebido (R$)</label>
+                            <input type="number" id="decimoTerceiroRecebido" step="0.01" min="0" value="0">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="feriasRecebidas">Férias Recebidas (R$)</label>
+                            <input type="number" id="feriasRecebidas" step="0.01" min="0" value="0">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="multaFGTSRecebida">Multa FGTS (40%) Recebida (R$)</label>
+                            <input type="number" id="multaFGTSRecebida" step="0.01" min="0" value="0">
+                        </div>
+                    </div>
+
+                    <div class="btn-group">
+                        <button type="button" class="btn-back" onclick="prevStep(3)">Voltar</button>
+                        <button type="button" class="btn-calculate" onclick="calcularRescisao()">Calcular Minha Rescisão</button>
+                    </div>
+                </section>
+
+                <!-- ETAPA 5: Resultados -->
+                <section class="form-section" id="step5">
+                    <h2>Resultado da Sua Rescisão</h2>
+                    
+                    <div id="resultadoCalculos" class="resultado-container">
+                        <!-- Resultados serão inseridos aqui via JavaScript -->
+                    </div>
+
+                    <div class="cta-section">
+                        <h3>Tem diferenças a receber?</h3>
+                        <p>Conecte-se com um advogado trabalhista especializado para garantir seus direitos.</p>
+                        
+                        <button type="button" class="btn-cta" onclick="showLeadForm()">
+                            Falar com um Advogado Agora
+                        </button>
+                    </div>
+
+                    <button type="button" class="btn-back" onclick="resetForm()">Fazer Novo Cálculo</button>
+                </section>
+            </form>
+
+            <!-- Modal para Captura de Lead -->
+            <div id="leadModal" class="modal">
+                <div class="modal-content">
+                    <span class="close" onclick="closeLeadForm()">&times;</span>
+                    <h2>Conecte-se com um Advogado</h2>
+                    <p>Preencha seus dados e entraremos em contato em até 24 horas.</p>
+                    
+                    <form id="leadForm" onsubmit="submitLead(event)">
+                        <div class="form-group">
+                            <label for="leadNome">Nome Completo *</label>
+                            <input type="text" id="leadNome" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="leadEmail">E-mail *</label>
+                            <input type="email" id="leadEmail" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="leadTelefone">Telefone/WhatsApp *</label>
+                            <input type="tel" id="leadTelefone" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="leadCidade">Cidade/Estado</label>
+                            <input type="text" id="leadCidade">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="leadMensagem">Mensagem (opcional)</label>
+                            <textarea id="leadMensagem" rows="4"></textarea>
+                        </div>
+
+                        <button type="submit" class="btn-submit-lead">Enviar Solicitação</button>
+                    </form>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>&copy; 2025 Calculadora de Rescisão Trabalhista. Todos os direitos reservados.</p>
+            <p class="disclaimer">Esta calculadora fornece estimativas baseadas na legislação trabalhista brasileira. Consulte um advogado para análise precisa do seu caso.</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

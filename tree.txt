@@ -1,0 +1,25 @@
+calculadora-rescisao/
+│
+├── index.html                 # Página principal
+├── style.css                  # Estilos da aplicação
+├── script.js                  # Lógica de cálculos
+│
+├── api/
+│   └── submit-lead.js        # Serverless function para Vercel (envio de leads)
+│
+├── data/
+│   └── formulas.json         # Fórmulas e tooltips estruturados
+│
+├── assets/
+│   ├── icons/
+│   │   ├── info.svg          # Ícone de informação para tooltips
+│   │   └── logo.svg          # Logo da aplicação
+│   └── images/
+│       └── background.jpg    # Imagem de fundo (opcional)
+│
+├── db/
+│   └── schema.sql            # Schema do banco de dados
+│
+├── package.json              # Dependências do projeto
+├── vercel.json               # Configuração do Vercel
+└── README.md                 # Documentação do projeto
