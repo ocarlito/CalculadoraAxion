@@ -184,7 +184,7 @@ header h1 {
     content: attr(data-tooltip);
     position: absolute;
     bottom: 125%;
-    left: 50%;
+    left: 100%;
     transform: translateX(-50%);
     background: rgba(0, 0, 0, 0.95);
     color: var(--text-light);

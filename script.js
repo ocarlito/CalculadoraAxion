@@ -8,6 +8,10 @@ let calculoResultado = {};
 let meses13AlteradoManualmente = false;
 
 const DIA_EM_MS = 1000 * 60 * 60 * 24;
+const formatterBRL = new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL'
+});
 
 // Navegação entre etapas
 function nextStep(step) {
@@ -67,12 +71,60 @@ document.getElementById('informarValoresRecebidos')?.addEventListener('change', 
     toggleSection('valoresRecebidosSection');
 });
 
+function aplicarMascaraData(valor) {
+    return valor
+        .replace(/\D/g, '')
+        .replace(/^(\d{2})(\d)/, '$1/$2')
+        .replace(/^(\d{2}\/\d{2})(\d)/, '$1/$2')
+        .substring(0, 10);
+}
+
+function parseDataBR(valor) {
+    if (!valor) return null;
+
+    if (valor.length !== 10) return null;
+
+    const partes = valor.split('/');
+    if (partes.length !== 3) return null;
+
+    const dia = parseInt(partes[0], 10);
+    const mes = parseInt(partes[1], 10) - 1; // zero-based
+    const ano = parseInt(partes[2], 10);
+
+    if (Number.isNaN(dia) || Number.isNaN(mes) || Number.isNaN(ano)) {
+        return null;
+    }
+
+    const data = new Date(ano, mes, dia);
+
+    if (data.getFullYear() !== ano || data.getMonth() !== mes || data.getDate() !== dia) {
+        return null;
+    }
+
+    data.setHours(0, 0, 0, 0);
+
+    return data;
+}
+
+function dataBRValida(valor) {
+    const data = parseDataBR(valor);
+    return data instanceof Date && !Number.isNaN(data.getTime());
+}
+
+function formatarMoeda(valor) {
+    return formatterBRL.format(valor || 0);
+}
+
 // Função principal de cálculo
 function calcularRescisao() {
     if (!validateCurrentStep()) return;
     
     // Coletar dados do formulário
     const dados = coletarDadosFormulario();
+
+    if (!dados) {
+        return;
+    }
     
     // Calcular cada verba
     const calculos = {
@@ -106,8 +158,30 @@ function calcularRescisao() {
 
 // Coletar dados do formulário
 function coletarDadosFormulario() {
-    const dataAdmissao = new Date(document.getElementById('dataAdmissao').value);
-    const dataRescisao = new Date(document.getElementById('dataRescisao').value);
+    const dataAdmissaoEl = document.getElementById('dataAdmissao');
+    const dataRescisaoEl = document.getElementById('dataRescisao');
+
+    const dataAdmissao = parseDataBR(dataAdmissaoEl?.value);
+    const dataRescisao = parseDataBR(dataRescisaoEl?.value);
+
+    if (!dataAdmissao || !dataRescisao) {
+        alert('Informe datas válidas no formato dd/mm/aaaa.');
+        return null;
+    }
+
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+
+    if (dataRescisao > hoje) {
+        alert('A data de rescisão não pode ser no futuro.');
+        return null;
+    }
+
+    if (dataRescisao < dataAdmissao) {
+        alert('A data de rescisão deve ser posterior à data de admissão.');
+        return null;
+    }
+
     const mesesTrabalhados13InputEl = document.getElementById('mesesTrabalhados13');
     const mesesTrabalhados13Automatico = calcularMesesTrabalhados13(dataAdmissao, dataRescisao);
 
@@ -271,9 +345,13 @@ function atualizarMesesTrabalhados13() {
         return;
     }
 
+    if (!dataBRValida(dataAdmissaoEl.value) || !dataBRValida(dataRescisaoEl.value)) {
+        return;
+    }
+
     const mesesCalculados = calcularMesesTrabalhados13(
-        new Date(dataAdmissaoEl.value),
-        new Date(dataRescisaoEl.value)
+        parseDataBR(dataAdmissaoEl.value),
+        parseDataBR(dataRescisaoEl.value)
     );
 
     if (typeof mesesCalculados === 'number' && !Number.isNaN(mesesCalculados)) {
@@ -293,7 +371,7 @@ function calcularSaldoSalario(dados) {
         nome: 'Saldo de Salário',
         valor: valor,
         descricao: `Salário proporcional aos ${dados.diasTrabalhadosMes} dias trabalhados no mês da rescisão`,
-        formula: `R$ ${dados.salarioBaseTotal.toFixed(2)} × (${dados.diasTrabalhadosMes} ÷ 30) = R$ ${valor.toFixed(2)}`
+        formula: `${formatarMoeda(dados.salarioBaseTotal)} × (${dados.diasTrabalhadosMes} ÷ 30) = ${formatarMoeda(valor)}`
     };
 }
 
@@ -320,7 +398,7 @@ function calcularAvisoPrevio(dados) {
         nome: 'Aviso Prévio Indenizado',
         valor: valorFinal,
         descricao: `${diasAviso} dias de aviso prévio (30 dias + ${3 * dados.anosCompletos} dias adicionais)${dados.tipoRescisao === 'acordo' ? ' - 50% (acordo)' : ''}`,
-        formula: `R$ ${dados.salarioBaseTotal.toFixed(2)} × (${diasAviso} ÷ 30) = R$ ${valorFinal.toFixed(2)}`
+        formula: `${formatarMoeda(dados.salarioBaseTotal)} × (${diasAviso} ÷ 30) = ${formatarMoeda(valorFinal)}`
     };
 }
 
@@ -340,15 +418,17 @@ function calcularDecimoTerceiro(dados) {
     }
     
     // CORRIGIDO: Considerar frações de 15 dias ou mais como mês completo
-    valor = dados.salarioBaseTotal * (dados.mesesTrabalhados13 / 12);
+    const valorBase = dados.salarioBaseTotal * (dados.mesesTrabalhados13 / 12);
+    valor = valorBase;
     descricao = `13º proporcional a ${dados.mesesTrabalhados13} meses trabalhados no ano`;
-    formula = `R$ ${dados.salarioBaseTotal.toFixed(2)} × (${dados.mesesTrabalhados13} ÷ 12) = R$ ${valor.toFixed(2)}`;
-    
+
     // Se for acordo, paga 50%
     if (dados.tipoRescisao === 'acordo') {
         valor *= 0.5;
         descricao += ' - 50% (acordo)';
     }
+
+    formula = `${formatarMoeda(dados.salarioBaseTotal)} × (${dados.mesesTrabalhados13} ÷ 12) = ${formatarMoeda(valor)}`;
     
     return {
         nome: '13º Salário Proporcional',
@@ -373,7 +453,7 @@ function calcularFerias(dados) {
         
         valorTotal += valorTotalVencidas;
         descricao.push(`${dados.periodosFeriasVencidas} período(s) de férias vencidas${dados.feriasEmDobro ? ' em dobro' : ''}`);
-        formula.push(`(R$ ${dados.salarioBaseTotal.toFixed(2)} + 1/3) × ${multiplicador} × ${dados.periodosFeriasVencidas} = R$ ${valorTotalVencidas.toFixed(2)}`);
+        formula.push(`(${formatarMoeda(dados.salarioBaseTotal)} + 1/3) × ${multiplicador} × ${dados.periodosFeriasVencidas} = ${formatarMoeda(valorTotalVencidas)}`);
     }
     
     // Férias proporcionais
@@ -386,7 +466,7 @@ function calcularFerias(dados) {
         
         valorTotal += valorFinal;
         descricao.push(`Férias proporcionais (${dados.mesesTrabalhadosProporcionais}/12 + 1/3)${dados.tipoRescisao === 'acordo' ? ' - 50% (acordo)' : ''}`);
-        formula.push(`R$ ${dados.salarioBaseTotal.toFixed(2)} × (${dados.mesesTrabalhadosProporcionais} ÷ 12) × 1.333 = R$ ${valorFinal.toFixed(2)}`);
+        formula.push(`${formatarMoeda(dados.salarioBaseTotal)} × (${dados.mesesTrabalhadosProporcionais} ÷ 12) × 1,333 = ${formatarMoeda(valorFinal)}`);
     }
     
     return {
@@ -426,7 +506,7 @@ function calcularFGTS(dados) {
         nome: 'Multa do FGTS',
         valor: valor,
         descricao: descricao,
-        formula: `R$ ${dados.saldoFGTS.toFixed(2)} × ${(multaPercentual * 100).toFixed(0)}% = R$ ${valor.toFixed(2)}`
+        formula: `${formatarMoeda(dados.saldoFGTS)} × ${(multaPercentual * 100).toFixed(0)}% = ${formatarMoeda(valor)}`
     };
 }
 
@@ -455,7 +535,7 @@ function exibirResultados() {
                         ${calc.descricao}
                     </div>
                 </div>
-                <div class="resultado-valor">R$ ${calc.valor.toFixed(2)}</div>
+                <div class="resultado-valor">${formatarMoeda(calc.valor)}</div>
             </div>
         `;
     }
@@ -466,7 +546,7 @@ function exibirResultados() {
     html += `
         <div class="resultado-item total">
             <div class="resultado-label">TOTAL QUE VOCÊ DEVERIA RECEBER</div>
-            <div class="resultado-valor">R$ ${totalDevido.toFixed(2)}</div>
+            <div class="resultado-valor">${formatarMoeda(totalDevido)}</div>
         </div>
     `;
     
@@ -475,7 +555,7 @@ function exibirResultados() {
         html += `
             <div class="resultado-item">
                 <div class="resultado-label">Total Já Recebido</div>
-                <div class="resultado-valor">R$ ${totalRecebido.toFixed(2)}</div>
+                <div class="resultado-valor">${formatarMoeda(totalRecebido)}</div>
             </div>
         `;
     }
@@ -489,7 +569,7 @@ function exibirResultados() {
     html += `
         <div class="resultado-item ${diferencaClass}">
             <div class="resultado-label">${diferencaTexto}</div>
-            <div class="resultado-valor">R$ ${Math.abs(diferenca).toFixed(2)}</div>
+            <div class="resultado-valor">${formatarMoeda(Math.abs(diferenca))}</div>
         </div>
     `;
     
@@ -497,7 +577,7 @@ function exibirResultados() {
     if (diferenca > 0) {
         html += `
             <div class="message error" style="margin-top: 20px;">
-                <strong>⚠️ Atenção!</strong> Foi identificada uma diferença de <strong>R$ ${diferenca.toFixed(2)}</strong> 
+                <strong>⚠️ Atenção!</strong> Foi identificada uma diferença de <strong>${formatarMoeda(diferenca)}</strong> 
                 que você tem direito a receber. Entre em contato com um advogado trabalhista para reivindicar seus direitos.
             </div>
         `;
@@ -576,26 +656,45 @@ function resetForm() {
         section.classList.remove('active');
     });
     document.getElementById('step1').classList.add('active');
+    meses13AlteradoManualmente = false;
+    atualizarMesesTrabalhados13();
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // Inicialização
 document.addEventListener('DOMContentLoaded', function() {
-    // Definir data máxima como hoje
-    const hoje = new Date().toISOString().split('T')[0];
-    document.getElementById('dataRescisao').setAttribute('max', hoje);
-
     const dataAdmissaoInput = document.getElementById('dataAdmissao');
     const dataRescisaoInput = document.getElementById('dataRescisao');
     const meses13Input = document.getElementById('mesesTrabalhados13');
 
-    const handleDateChange = () => {
-        meses13AlteradoManualmente = false;
-        atualizarMesesTrabalhados13();
-    };
+    const inputsData = [dataAdmissaoInput, dataRescisaoInput].filter(Boolean);
 
-    dataAdmissaoInput?.addEventListener('change', handleDateChange);
-    dataRescisaoInput?.addEventListener('change', handleDateChange);
+    inputsData.forEach(input => {
+        input.addEventListener('input', event => {
+            const mascarado = aplicarMascaraData(event.target.value);
+            event.target.value = mascarado;
+        });
+
+        input.addEventListener('blur', event => {
+            const { value } = event.target;
+
+            if (!value) {
+                atualizarMesesTrabalhados13();
+                return;
+            }
+
+            if (!dataBRValida(value)) {
+                alert('Informe uma data válida no formato dd/mm/aaaa.');
+                event.target.value = '';
+                setTimeout(() => event.target.focus(), 0);
+                return;
+            }
+
+            meses13AlteradoManualmente = false;
+            atualizarMesesTrabalhados13();
+        });
+    });
+
     meses13Input?.addEventListener('input', () => {
         meses13AlteradoManualmente = true;
     });
