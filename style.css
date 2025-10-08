@@ -20,7 +20,7 @@
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: #232526;
     background: -webkit-linear-gradient(to right, #414345, #232526);
     background: linear-gradient(to right, #414345, #232526);
@@ -118,6 +118,19 @@ header h1 {
     transition: var(--transition);
 }
 
+.form-group select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background: rgba(255, 255, 255, 0.08) url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8"%3E%3Cpath d="M1 1l5 5 5-5" stroke="%23ffffff" stroke-width="2" fill="none" stroke-linecap="round"/%3E%3C/svg%3E') no-repeat right 12px center;
+    background-size: 12px;
+}
+
+.form-group select option {
+    background-color: #272727;
+    color: var(--text-light);
+}
+
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
@@ -130,6 +143,7 @@ header h1 {
 .form-group input::placeholder,
 .form-group textarea::placeholder {
     color: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.12);
 }
 
 /* Checkbox Groups */
@@ -269,6 +283,7 @@ button {
         background-position: 100% 50%;
     }
 }
+         
 
 .btn-next:hover,
 .btn-calculate:hover,
